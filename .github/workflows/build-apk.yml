@@ -1,0 +1,40 @@
+name: Build Tacho NFC Test APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'TachoNfcTest.zip'
+      - '.github/workflows/build-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract project
+        run: |
+          unzip -o TachoNfcTest.zip -d project
+          cd project
+          ls -la
+
+      - name: Install Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build APK
+        working-directory: project
+        run: |
+          gradle wrapper --gradle-version 8.7
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: TachoNfcTest-APK
+          path: project/app/build/outputs/apk/debug/app-debug.apk
